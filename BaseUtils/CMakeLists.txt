@@ -12,6 +12,7 @@ INCLUDE_DIRECTORIES (
 SET ( SRC_FILES
     BaseThread.cpp
     Buffer.cpp
+    Handler.cpp
     Looper.cpp
     LooperRoster.cpp
     Message.cpp
