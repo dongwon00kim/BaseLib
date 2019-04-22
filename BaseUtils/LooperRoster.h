@@ -14,86 +14,77 @@
  * limitations under the License.
  */
 
-/** @file LooperRoster.h
- *
- *  Brief description.
- *
- *  @author            Dongwon, Kim (dongwon00.kim@gmail.com)
- *  @version           1.0
- *  @date              2016.05.11
- *  @note
- *  @see
- */
+#ifndef LOOPER_ROSTER_H_
+#define LOOPER_ROSTER_H_
 
-#ifndef _LOOPER_ROSTER_H_
-#define _LOOPER_ROSTER_H_
-
+#include <condition_variable>
 #include <map>
 #include <memory>
+#include <baseutils/Looper.h>
 
-#include <Looper.h>
-
-namespace utils {
 namespace baseutils {
 
 class LooperRoster {
 public:
     static LooperRoster* getInstance();
 
-    Looper::handler_id registerHandler(const shared_ptr<Looper> looper, const shared_ptr<Handler>& handler);
+    Looper::handler_id registerHandler(const std::shared_ptr<Looper> looper, const std::shared_ptr<Handler>& handler);
 
     void unregisterHandler(Looper::handler_id handlerId);
 
-    Result postMessage(const shared_ptr<Message>& msg, const chrono::system_clock::duration& delay);
+    Result postMessage(const std::shared_ptr<Message>& msg, const std::chrono::system_clock::duration& delay);
 
-    Result cancelMessage(const shared_ptr<Message>& msg);
+    Result cancelMessage(const std::shared_ptr<Message>& msg);
 
-    void deliverMessage(const shared_ptr<Message>& msg);
+    void deliverMessage(const std::shared_ptr<Message>& msg);
 
-    Result postAndAwaitResponse(const shared_ptr<Message>& msg, shared_ptr<Message>& response);
+    Result postAndAwaitResponse(const std::shared_ptr<Message>& msg, std::shared_ptr<Message>& response);
 
-    void postReply(uint32_t replyID, const shared_ptr<Message>& reply);
+    void postReply(uint32_t replyID, const std::shared_ptr<Message>& reply);
 
-    shared_ptr<Looper> findLooper(Looper::handler_id handlerId);
+    std::shared_ptr<Looper> findLooper(Looper::handler_id handlerId);
 
 private:
     class HandlerInfo {
     public:
-        weak_ptr<Looper> mLooper;
-        weak_ptr<Handler> mHandler;
+        std::weak_ptr<Looper> mLooper;
+        std::weak_ptr<Handler> mHandler;
     };
 
     static LooperRoster* mInstance;
 
-    Mutex mLock;
+    std::mutex mLock;
 
     /**
      * key : handler ID
      * value : HandlerInfo
      */
-    map<Looper::handler_id, HandlerInfo> mHandlers;
+    std::map<Looper::handler_id, HandlerInfo> mHandlers;
     Looper::handler_id mNextHandlerId;
     uint32_t mNextReplyId;
-    Condition mRepliesCondition;
+    std::condition_variable mRepliesCondition;
 
     /**
      * key : replyId
      * value : Message
      */
-    map<uint32_t, shared_ptr<Message> > mReplies;
-
-    Result postMessage_l(const shared_ptr<Message>& msg, const chrono::system_clock::duration& delay);
-
-    Result cancelMessage_l(const shared_ptr<Message>& msg);
+    std::map<uint32_t, std::shared_ptr<Message>> mReplies;
 
     // Singleton
     LooperRoster();
+
     ~LooperRoster();
 
-    DISALLOW_EVIL_CONSTRUCTORS(LooperRoster);
+    LooperRoster(const LooperRoster&) = delete;
+
+    LooperRoster& operator=(const LooperRoster&) = delete;
+
+    Result postMessage_l(const std::shared_ptr<Message>& msg, const std::chrono::system_clock::duration& delay);
+
+    Result cancelMessage_l(const std::shared_ptr<Message>& msg);
+
 };
 
-}; // namespace baseutils
-}; // namespace utils
+} // namespace baseutils
 
-#endif  // _LOOPER_ROSTER_H_
+#endif  // LOOPER_ROSTER_H_

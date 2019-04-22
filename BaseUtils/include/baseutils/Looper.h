@@ -14,38 +14,23 @@
  * limitations under the License.
  */
 
-/** @file Looper.h
- *
- *  Brief description.
- *
- *  @author            Dongwon, Kim (dongwon00.kim@gmail.com)
- *  @version           1.0
- *  @date              2016.05.11
- *  @note
- *  @see
- */
+#ifndef LOOPER_H_
+#define LOOPER_H_
 
-#ifndef _LOOPER_H_
-#define _LOOPER_H_
-
-#include <memory>
-#include <string>
-#include <list>
-#include <cstdint>
 #include <chrono>
+#include <condition_variable>
+#include <list>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <baseutils/Result.h>
 
-#include <Base.h>
-#include <BaseThread.h>
-
-using namespace std;
-
-namespace utils {
 namespace baseutils {
 
 class Handler;
 class Message;
 
-class Looper : virtual public enable_shared_from_this<Looper> {
+class Looper : virtual public std::enable_shared_from_this<Looper> {
 public:
     typedef int32_t event_id;
     typedef int32_t handler_id;
@@ -55,9 +40,10 @@ public:
     virtual ~Looper();
 
     // Takes effect in a subsequent call to start().
-    void setName(const string& name);
+    void setName(const std::string& name);
 
-    handler_id registerHandler(const shared_ptr<Handler>& handler);
+    handler_id registerHandler(const std::shared_ptr<Handler>& handler);
+
     void unregisterHandler(handler_id handlerID);
 
     Result start(bool runOnCallingThread = false);
@@ -66,37 +52,41 @@ public:
 
     static int64_t GetNowUs();
 
-    static chrono::system_clock::duration GetNow();
+    static std::chrono::system_clock::duration GetNow();
 
 private:
     friend class LooperRoster;
 
     struct Event {
-        chrono::system_clock::duration mWhen;
-        shared_ptr<Message> mMessage;
+        std::chrono::system_clock::duration mWhen;
+        std::shared_ptr<Message> mMessage;
     };
 
-    Mutex mLock;
-    Condition mQueueChangedCondition;
+    std::mutex mLock;
 
-    string mName;
+    std::condition_variable mQueueChangedCondition;
 
-    list<Event> mEventQueue;
+    std::string mName;
+
+    std::list<Event> mEventQueue;
 
     class LooperThread;
-    shared_ptr<LooperThread> mThread;
+
+    std::shared_ptr<LooperThread> mThread;
+
     bool mRunningLocally;
 
-    void post(const shared_ptr<Message>& msg, const chrono::system_clock::duration& delay);
+    Looper(const Looper&) = delete;
 
-    Result cancel(const shared_ptr<Message>& msg);
+    Looper& operator=(const Looper&) = delete;
+
+    void post(const std::shared_ptr<Message>& msg, const std::chrono::system_clock::duration& delay);
+
+    Result cancel(const std::shared_ptr<Message>& msg);
 
     bool loop();
-
-    DISALLOW_EVIL_CONSTRUCTORS(Looper);
 };
 
-}; // namespace baseutils
-}; // namespace utils
+} // namespace baseutils
 
-#endif  // _LOOPER_H_
+#endif  // LOOPER_H_

@@ -14,27 +14,15 @@
  * limitations under the License.
  */
 
-/** @file Looper.cpp
- *
- *  Brief description.
- *
- *  @author            Dongwon, Kim (dongwon00.kim@gmail.com)
- *  @version           1.0
- *  @date              2016.05.11
- *  @note
- *  @see
- */
-
+#include <baseutils/Handler.h>
+#include <baseutils/Looper.h>
+#include <baseutils/Message.h>
 #include "BaseThread.h"
-#include "Looper.h"
 #include "LooperRoster.h"
 
-#include "Handler.h"
-#include "Message.h"
+using namespace std;
+using namespace std::chrono;
 
-using namespace chrono;
-
-namespace utils {
 namespace baseutils {
 
 class Looper::LooperThread : public BaseThread {
@@ -62,10 +50,12 @@ public:
     }
 
 private:
+    LooperThread(const LooperThread&) = delete;
+
+    LooperThread& operator=(const LooperThread&) = delete;
+
     Looper* mLooper;
     thread::id mThreadId;
-
-    DISALLOW_EVIL_CONSTRUCTORS(LooperThread);
 };
 
 // static
@@ -105,7 +95,7 @@ Result Looper::start(bool runOnCallingThread) {
 
     if (runOnCallingThread) {
         {
-            AutoLock autoLock(mLock);
+            unique_lock<mutex> autoLock(mLock);
 
             if (mThread != NULL || mRunningLocally) {
                 return Result::ER_INVALID_OPERATION;
@@ -120,7 +110,7 @@ Result Looper::start(bool runOnCallingThread) {
         return Result::OK;
     }
 
-    AutoLock autoLock(mLock);
+    unique_lock<mutex> autoLock(mLock);
 
     if (mThread != NULL || mRunningLocally) {
         return Result::ER_ALREADY_OPERATED;
@@ -141,7 +131,7 @@ Result Looper::stop() {
     bool runningLocally;
 
     {
-        AutoLock autoLock(mLock);
+        unique_lock<mutex> autoLock(mLock);
 
         thread = mThread;
         runningLocally = mRunningLocally;
@@ -169,7 +159,7 @@ Result Looper::stop() {
 }
 
 void Looper::post(const shared_ptr<Message>& msg, const system_clock::duration& delay) {
-    AutoLock autoLock(mLock);
+    unique_lock<mutex> autoLock(mLock);
 
     system_clock::duration when;
     if (delay > system_clock::duration(0)) {
@@ -195,7 +185,7 @@ void Looper::post(const shared_ptr<Message>& msg, const system_clock::duration& 
 }
 
 Result Looper::cancel(const shared_ptr<Message>& msg) {
-    AutoLock autoLock(mLock);
+    unique_lock<mutex> autoLock(mLock);
     Result ret = Result::ER_NAME_NOT_FOUND;
 
     for(auto itr = mEventQueue.begin(); itr != mEventQueue.end(); ++itr) {
@@ -212,7 +202,7 @@ bool Looper::loop() {
     Event event;
 
     {
-        AutoLock autoLock(mLock);
+        unique_lock<mutex> autoLock(mLock);
         if (mThread == NULL && !mRunningLocally) {
             return false;
         }
@@ -245,5 +235,4 @@ bool Looper::loop() {
     return true;
 }
 
-}; // namespace baseutils
-}; // namespace utils
+} // namespace baseutils

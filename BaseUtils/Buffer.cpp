@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
-/** @file Buffer.cpp
- *
- *  Brief description.
- *
- *  @author            Dongwon, Kim (dongwon00.kim@gmail.com)
- *  @version           1.0
- *  @date              2016.05.11
- *  @note
- *  @see
- */
-
 #include <cassert>
 #include <string.h>
+#include <baseutils/Buffer.h>
+#include <baseutils/Looper.h>
+#include <baseutils/Message.h>
 
-#include "Buffer.h"
-#include "Looper.h"
-#include "Message.h"
+using namespace std;
 
-namespace utils {
 namespace baseutils {
 
 Buffer::Buffer(const size_t capacity) :
@@ -82,5 +71,4 @@ shared_ptr<Message> Buffer::meta() {
     return mMeta;
 }
 
-}; // namespace baseutils
-}; // namespace utils
+} // namespace baseutils

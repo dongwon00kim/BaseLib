@@ -1,20 +1,8 @@
-/** @file Result.h
- *
- *  Brief description.
- *
- *  @author            Dongwon, Kim (dongwon00.kim@gmail.com)
- *  @version           1.0
- *  @date              2016.05.11
- *  @note
- *  @see
- */
-
-#ifndef _RESULT_H_
-#define _RESULT_H_
+#ifndef RESULT_H_
+#define RESULT_H_
 
 #include <errno.h>
 
-namespace utils {
 namespace baseutils {
 
 //#define EPERM            1      /* Operation not permitted */
@@ -176,7 +164,6 @@ enum class Result {
     ER_DEPRECATED_COMMAND      = 0x10008008,
 };
 
-}; // namespace baseutils
-}; // namespace utils
+} // namespace baseutils
 
-#endif // _RESULT_H_
+#endif // RESULT_H_

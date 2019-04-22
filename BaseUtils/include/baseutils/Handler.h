@@ -14,28 +14,15 @@
  * limitations under the License.
  */
 
-/** @file Handler.h
- *
- *  Brief description.
- *
- *  @author            Dongwon, Kim (dongwon00.kim@gmail.com)
- *  @version           1.0
- *  @date              2016.05.11
- *  @note
- *  @see
- */
+#ifndef HANDLER_H_
+#define HANDLER_H_
 
-#ifndef _HANDLER_H_
-#define _HANDLER_H_
+#include <baseutils/Looper.h>
 
-#include <Base.h>
-#include <Looper.h>
-#include <LooperRoster.h>
-
-namespace utils {
 namespace baseutils {
 
 class Message;
+class LooperRoster;
 
 class Handler {
 public:
@@ -43,10 +30,10 @@ public:
 
     Looper::handler_id id() const { return mID; }
 
-    shared_ptr<Looper> looper() { return LooperRoster::getInstance()->findLooper(id()); }
+    std::shared_ptr<Looper> looper();
 
 protected:
-    virtual void onMessageReceived(const shared_ptr<Message>& msg) = 0;
+    virtual void onMessageReceived(const std::shared_ptr<Message>& msg) = 0;
 
 private:
     friend class LooperRoster;
@@ -55,10 +42,11 @@ private:
 
     void setID(Looper::handler_id id) { mID = id; }
 
-    DISALLOW_EVIL_CONSTRUCTORS(Handler);
+    Handler(const Handler&) = delete;
+
+    Handler& operator=(const Handler&) = delete;
 };
 
-}; // namespace baseutils
-}; // namespace utils
+} // namespace baseutils
 
-#endif  // _HANDLER_H_
+#endif  // HANDLER_H_

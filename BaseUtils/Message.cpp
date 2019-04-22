@@ -14,17 +14,6 @@
  * limitations under the License.
  */
 
-/** @file Message.cpp
- *
- *  Brief description.
- *
- *  @author            Dongwon, Kim (dongwon00.kim@gmail.com)
- *  @version           1.0
- *  @date              2016.05.11
- *  @note
- *  @see
- */
-
 #include <cstdio>
 #include <cctype>
 #include <cassert>
@@ -33,15 +22,14 @@
 #include <string>
 #include <memory>
 
-#include "Message.h"
-#include "Buffer.h"
-#include "SendableObject.h"
+#include <baseutils/Buffer.h>
+#include <baseutils/Message.h>
+#include <baseutils/Parcelable.h>
 #include "LooperRoster.h"
 
 using namespace std;
 using namespace chrono;
 
-namespace utils {
 namespace baseutils {
 
 Message::Message(const Looper::handler_id target)
@@ -133,20 +121,20 @@ const shared_ptr<Message::Item> Message::findItem(const string& name, Type type)
     return item;
 }
 
-#define BASIC_TYPE(NAME,FIELDNAME,TYPENAME)                             \
-void Message::set##NAME(const string& name, TYPENAME value) {           \
-    auto item(allocateItem(name));                                      \
-    item->mType = kType##NAME;                                          \
-    item->value.FIELDNAME = value;                                      \
-}                                                                                 \
-                                                                                  \
-bool Message::find##NAME(const string& name, TYPENAME& value) const {   \
-    auto item(findItem(name, kType##NAME));                             \
-    if (item) {                                                         \
-        value = item->value.FIELDNAME;                                  \
-        return true;                                                    \
-    }                                                                             \
-    return false;                                                       \
+#define BASIC_TYPE(NAME,FIELDNAME,TYPENAME)                                 \
+void Message::set##NAME(const string& name, TYPENAME value) {         \
+    auto item(allocateItem(name));                                          \
+    item->mType = kType##NAME;                                              \
+    item->value.FIELDNAME = value;                                          \
+}                                                                           \
+                                                                            \
+bool Message::find##NAME(const string& name, TYPENAME* const value) const { \
+    auto item(findItem(name, kType##NAME));                                 \
+    if (item) {                                                             \
+        (*value) = item->value.FIELDNAME;                                   \
+        return true;                                                        \
+    }                                                                       \
+    return false;                                                           \
 }
 
 BASIC_TYPE(Boolean,boolValue,bool)
@@ -159,7 +147,7 @@ BASIC_TYPE(Pointer,ptrValue,void*)
 
 #undef BASIC_TYPE
 
-void Message::setString(const string& name, const string str) {
+void Message::setString(const string& name, const string& str) {
     auto item(allocateItem(name));
     item->mType = kTypeString;
     item->stringValue = str;
@@ -177,43 +165,43 @@ void Message::setMessage(const string& name, const shared_ptr<Message>& message)
     item->messagePtr = message;
 }
 
-void Message::setObject(const string& name, const shared_ptr<SendableObject>& object) {
+void Message::setObject(const string& name, const shared_ptr<Parcelable>& object) {
     auto item(allocateItem(name));
     item->mType = kTypeObject;
     item->objectPtr = object;
 }
 
-bool Message::findString(const string& name, string& value) const {
+bool Message::findString(const string& name, string* const value) const {
     auto item(findItem(name, kTypeString));
     if (item) {
-        value = item->stringValue;
+        (*value) = item->stringValue;
         return true;
     }
     return false;
 }
 
-bool Message::findBuffer(const string& name, shared_ptr<Buffer>& buf) const {
+bool Message::findBuffer(const string& name, shared_ptr<Buffer>* const buf) const {
     auto item(findItem(name, kTypeBuffer));
     if (item) {
-        buf = item->bufferPtr;
+        (*buf) = item->bufferPtr;
         return true;
     }
     return false;
 }
 
-bool Message::findMessage(const string& name, shared_ptr<Message>& message) const {
+bool Message::findMessage(const string& name, shared_ptr<Message>* const message) const {
     auto item(findItem(name, kTypeMessage));
     if (item) {
-        message = item->messagePtr;
+        (*message) = item->messagePtr;
         return true;
     }
     return false;
 }
 
-bool Message::findObject(const string& name, shared_ptr<SendableObject>& object) const {
+bool Message::findObject(const string& name, shared_ptr<Parcelable>* const object) const {
     auto item(findItem(name, kTypeObject));
     if (item) {
-        object = item->objectPtr;
+        (*object) = item->objectPtr;
         return true;
     }
     return false;
@@ -238,7 +226,7 @@ void Message::postReply(const uint32_t replyId) {
 
 bool Message::senderAwaitsResponse(uint32_t& replyId) const {
     int32_t tmp;
-    bool found = findInt32("replyId", tmp);
+    bool found = findInt32("replyId", &tmp);
     if (!found) {
         return false;
     }
@@ -465,5 +453,4 @@ Result Message::postMessage(const chrono::system_clock::duration& delay) {
     return LooperRoster::getInstance()->postMessage(shared_from_this(), delay);
 }
 
-}; // namespace baseutils
-}; // namespace utils
+} // namespace baseutils

@@ -14,30 +14,14 @@
  * limitations under the License.
  */
 
-/** @file Buffer.h
- *
- *  Brief description.
- *
- *  @author            Dongwon, Kim (dongwon00.kim@gmail.com)
- *  @version           1.0
- *  @date              2016.05.11
- *  @note
- *  @see
- */
+#ifndef BUFFER_H_
+#define BUFFER_H_
 
-#ifndef _BUFFER_H_
-#define _BUFFER_H_
-
-#include <sys/types.h>
-#include <stdint.h>
+//#include <sys/types.h>
+//#include <stdint.h>
 #include <memory>
+#include <baseutils/Message.h>
 
-#include <Base.h>
-#include <Message.h>
-
-using namespace std;
-
-namespace utils {
 namespace baseutils {
 
 class Message;
@@ -45,11 +29,12 @@ class Message;
 class Buffer{
 public:
     Buffer(const size_t capacity);
+
     Buffer(const void* data, const size_t capacity);
 
     virtual ~Buffer();
 
-    void setFarewellMessage(const shared_ptr<Message>& msg);
+    void setFarewellMessage(const std::shared_ptr<Message>& msg);
 
     uint8_t* base() { return (uint8_t*)mData; }
 
@@ -67,22 +52,19 @@ public:
 
     const int32_t int32Data() const { return mInt32Data; }
 
-    shared_ptr<Message> meta();
+    std::shared_ptr<Message> meta();
 
 private:
-    shared_ptr<Message> mFarewell;
-    shared_ptr<Message> mMeta;
+    std::shared_ptr<Message> mFarewell;
+    std::shared_ptr<Message> mMeta;
 
     void *mData;
     size_t mCapacity;
     size_t mRangeOffset;
     size_t mRangeLength;
     int32_t mInt32Data;
-
-    DISALLOW_EVIL_CONSTRUCTORS(Buffer);
 };
 
-}; // namespace baseutils
-}; // namespace utils
+} // namespace baseutils
 
-#endif  // _BUFFER_H_
+#endif  // BUFFER_H_

@@ -1,0 +1,28 @@
+CMAKE_MINIMUM_REQUIRED ( VERSION 2.8 )
+PROJECT ( "BaseUtils" )
+
+SET ( CMAKE_VERBOSE_MAKEFILE true )
+SET ( CMAKE_BUILD_TYPE Debug )
+
+INCLUDE_DIRECTORIES (
+    ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/include
+)
+
+SET ( SRC_FILES
+    BaseThread.cpp
+    Buffer.cpp
+    Looper.cpp
+    LooperRoster.cpp
+    Message.cpp
+)
+
+LINK_LIBRARIES(
+)
+
+ADD_LIBRARY ( ${PROJECT_NAME} SHARED ${SRC_FILES} )
+
+INSTALL (
+)
+
+SET ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BUILD_TYPE}/lib )

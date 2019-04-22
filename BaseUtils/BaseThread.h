@@ -14,37 +14,18 @@
  * limitations under the License.
  */
 
-/** @file BaseThread.h
- *
- *  Brief description.
- *
- *  @author            Dongwon, Kim (dongwon00.kim@gmail.com)
- *  @version           1.0
- *  @date              2016.05.11
- *  @note
- *  @see
- */
+#ifndef BASETHREAD_H_
+#define BASETHREAD_H_
 
-#ifndef _BASETHREAD_H_
-#define _BASETHREAD_H_
-
-#include <Result.h>
-#include <mutex>
 #include <condition_variable>
 #include <memory>
+#include <mutex>
 #include <thread>
+#include <baseutils/Result.h>
 
-
-using namespace std;
-
-namespace utils {
 namespace baseutils {
 
-typedef condition_variable  Condition;
-typedef mutex               Mutex;
-typedef unique_lock<mutex>  AutoLock;
-
-class BaseThread : virtual public enable_shared_from_this<BaseThread>
+class BaseThread : virtual public std::enable_shared_from_this<BaseThread>
 {
 public:
     // Create a Thread object, but doesn't create or start the associated
@@ -77,7 +58,7 @@ public:
             bool        isRunning() const;
 
     // Get Thread id handle.
-            thread::id  getThreadId() const;
+            std::thread::id getThreadId() const;
 
 protected:
     // exitPending() returns true if requestExit() has been called.
@@ -92,20 +73,19 @@ private:
     virtual bool        threadLoop() = 0;
 
 private:
-    BaseThread& operator=(const BaseThread&);
-    static  int         _threadLoop(shared_ptr<BaseThread> sharedSelf);
+    BaseThread&         operator=(const BaseThread&);
+    static  int         _threadLoop(std::shared_ptr<BaseThread> sharedSelf);
 
-            shared_ptr<thread> mThread;
-            thread::id         mThreadId;
+            std::shared_ptr<std::thread> mThread;
+            std::thread::id    mThreadId;
     // always hold mLock when reading or writing
-    mutable Mutex              mLock;
-            Condition          mThreadExitedCondition;
+    mutable std::mutex         mLock;
+            std::condition_variable mThreadExitedCondition;
             Result             mResult;
     // note that all accesses of mExitPending and mRunning need to hold mLock
     volatile bool              mExitPending;
     volatile bool              mRunning;
 };
-
 
 template<typename T>
 class ThreadLooper : public BaseThread {
@@ -120,7 +100,6 @@ private:
     virtual bool threadLoop() { return mImp->threadLoop(); }
 };
 
-}; // namespace baseutils
-}; // namespace utils
+} // namespace baseutils
 
-#endif // _BASETHREAD_H_
+#endif // BASETHREAD_H_

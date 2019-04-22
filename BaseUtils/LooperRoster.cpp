@@ -14,27 +14,15 @@
  * limitations under the License.
  */
 
-/** @file LooperRoster.cpp
- *
- *  Brief description.
- *
- *  @author            Dongwon, Kim (dongwon00.kim@gmail.com)
- *  @version           1.0
- *  @date              2016.05.11
- *  @note
- *  @see
- */
-
 #include <cassert>
 
+#include <baseutils/Handler.h>
+#include <baseutils/Message.h>
 #include "LooperRoster.h"
-#include "Handler.h"
-#include "Message.h"
 
 using namespace std;
 using namespace chrono;
 
-namespace utils {
 namespace baseutils {
 
 //static variable
@@ -58,7 +46,7 @@ LooperRoster::~LooperRoster() {
 
 Looper::handler_id LooperRoster::registerHandler(
         const shared_ptr<Looper> looper, const shared_ptr<Handler>& handler) {
-    AutoLock autoLock(mLock);
+    unique_lock<mutex> autoLock(mLock);
 
     if (handler->id() != 0) {
         assert(!"A handler must only be registered once.");
@@ -77,7 +65,7 @@ Looper::handler_id LooperRoster::registerHandler(
 }
 
 void LooperRoster::unregisterHandler(Looper::handler_id handlerId) {
-    AutoLock autoLock(mLock);
+    unique_lock<mutex> autoLock(mLock);
 
 
     auto search = mHandlers.find(handlerId);
@@ -94,7 +82,7 @@ void LooperRoster::unregisterHandler(Looper::handler_id handlerId) {
 }
 
 Result LooperRoster::postMessage(const shared_ptr<Message>& msg, const system_clock::duration& delay) {
-    AutoLock autoLock(mLock);
+    unique_lock<mutex> autoLock(mLock);
     return postMessage_l(msg, delay);
 }
 
@@ -121,7 +109,7 @@ Result LooperRoster::postMessage_l(const shared_ptr<Message>& msg, const system_
 }
 
 Result LooperRoster::cancelMessage(const shared_ptr<Message>& msg) {
-    AutoLock autoLock(mLock);
+    unique_lock<mutex> autoLock(mLock);
     return cancelMessage_l(msg);
 }
 
@@ -151,7 +139,7 @@ void LooperRoster::deliverMessage(const shared_ptr<Message>& msg) {
     shared_ptr<Handler> handler;
 
     {
-        AutoLock autoLock(mLock);
+        unique_lock<mutex> autoLock(mLock);
 
         auto search = mHandlers.find(msg->target());
         if (mHandlers.end() == search) {
@@ -173,7 +161,7 @@ void LooperRoster::deliverMessage(const shared_ptr<Message>& msg) {
 }
 
 shared_ptr<Looper> LooperRoster::findLooper(Looper::handler_id handlerId) {
-    AutoLock autoLock(mLock);
+    unique_lock<mutex> autoLock(mLock);
 
     auto search = mHandlers.find(handlerId);
     if (search == mHandlers.end()) {
@@ -190,7 +178,7 @@ shared_ptr<Looper> LooperRoster::findLooper(Looper::handler_id handlerId) {
 }
 
 Result LooperRoster::postAndAwaitResponse(const shared_ptr<Message>& msg, shared_ptr<Message>& response) {
-    AutoLock autoLock(mLock);
+    unique_lock<mutex> autoLock(mLock);
 
     uint32_t replyId = mNextReplyId++;
 
@@ -215,7 +203,7 @@ Result LooperRoster::postAndAwaitResponse(const shared_ptr<Message>& msg, shared
 }
 
 void LooperRoster::postReply(uint32_t replyId, const shared_ptr<Message>& reply) {
-    AutoLock autoLock(mLock);
+    unique_lock<mutex> autoLock(mLock);
 
     assert(mReplies.find(replyId) == mReplies.end());
 
@@ -223,5 +211,4 @@ void LooperRoster::postReply(uint32_t replyId, const shared_ptr<Message>& reply)
     mRepliesCondition.notify_all();
 }
 
-}; // namespace baseutils
-}; // namespace utils
+} // namespace baseutils

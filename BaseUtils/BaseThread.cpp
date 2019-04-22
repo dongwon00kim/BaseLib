@@ -14,27 +14,14 @@
  * limitations under the License.
  */
 
-/** @file BaseThread.cpp
- *
- *  Brief description.
- *
- *  @author            Dongwon, Kim (dongwon00.kim@gmail.com)
- *  @version           1.0
- *  @date              2016.05.11
- *  @note
- *  @see
- */
-
-#include <stddef.h>
-#include <assert.h>
-#include <mutex>
+#include <cassert>
 #include <condition_variable>
-
-#include <BaseThread.h>
+#include <mutex>
+#include <baseutils/Result.h>
+#include "BaseThread.h"
 
 using namespace std;
 
-namespace utils {
 namespace baseutils {
 
 BaseThread::BaseThread()
@@ -50,7 +37,7 @@ Result BaseThread::readyToRun() {
 }
 
 Result BaseThread::run() {
-    AutoLock lock(mLock);
+    unique_lock<mutex> lock(mLock);
 
     if (mRunning) {
         // thread already started
@@ -103,7 +90,7 @@ int BaseThread::_threadLoop(shared_ptr<BaseThread> sharedSelf) {
 
         // establish a scope for mLock
         {
-            AutoLock lock(sharedSelf->mLock);
+            unique_lock<mutex> lock(sharedSelf->mLock);
             if (result == false || sharedSelf->mExitPending) {
                 sharedSelf->mExitPending = true;
                 sharedSelf->mRunning = false;
@@ -128,12 +115,12 @@ int BaseThread::_threadLoop(shared_ptr<BaseThread> sharedSelf) {
 }
 
 void BaseThread::requestExit() {
-    AutoLock lock(mLock);
+    unique_lock<mutex> lock(mLock);
     mExitPending = true;
 }
 
 Result BaseThread::requestExitAndWait() {
-    AutoLock lock(mLock);
+    unique_lock<mutex> lock(mLock);
 
     if (mThreadId == getThreadId()) {
        // Don't call waitForExit() from this Thread object's thread. It's a guaranteed deadlock!
@@ -153,7 +140,7 @@ Result BaseThread::requestExitAndWait() {
 }
 
 Result BaseThread::join() {
-    AutoLock lock(mLock);
+    unique_lock<mutex> lock(mLock);
 
     if (mThreadId == getThreadId()) {
        // Don't call join() from this Thread object's thread. It's a guaranteed deadlock!
@@ -168,7 +155,7 @@ Result BaseThread::join() {
 }
 
 bool BaseThread::isRunning() const {
-    AutoLock lock(mLock);
+    unique_lock<mutex> lock(mLock);
     return mRunning;
 }
 
@@ -177,9 +164,8 @@ thread::id BaseThread::getThreadId() const {
 }
 
 bool BaseThread::exitPending() const {
-    AutoLock lock(mLock);
+    unique_lock<mutex> lock(mLock);
     return mExitPending;
 }
 
-}; // namespace baseutils
-}; // namespace utils
+} // namespace baseutils
