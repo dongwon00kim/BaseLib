@@ -45,7 +45,7 @@ LooperRoster::~LooperRoster() {
 }
 
 Looper::handler_id LooperRoster::registerHandler(
-        const shared_ptr<Looper> looper, const shared_ptr<Handler>& handler) {
+        const shared_ptr<Looper>& looper, const shared_ptr<Handler>& handler) {
     unique_lock<mutex> autoLock(mLock);
 
     if (handler->id() != 0) {

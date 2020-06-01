@@ -26,7 +26,7 @@ namespace baseutils {
 
 class Message;
 
-class Buffer{
+class Buffer {
 public:
     Buffer(const size_t capacity);
 
@@ -46,7 +46,11 @@ public:
 
     const size_t offset() const { return mRangeOffset; }
 
+    void consume(const size_t size);
+
     void setRange(const size_t offset, const size_t size);
+
+    void setSize(const size_t size);
 
     void setInt32Data(const int32_t data) { mInt32Data = data; }
 
@@ -54,7 +58,11 @@ public:
 
     std::shared_ptr<Message> meta();
 
-private:
+    bool operator==(const Buffer &other) const;
+
+    bool operator!=(const Buffer &other) const;
+
+protected:
     std::shared_ptr<Message> mFarewell;
     std::shared_ptr<Message> mMeta;
 

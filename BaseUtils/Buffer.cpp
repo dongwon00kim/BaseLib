@@ -52,6 +52,16 @@ Buffer::~Buffer() {
     }
 }
 
+void Buffer::consume(const size_t size) {
+    assert(size <= mRangeLength);
+    mRangeOffset += size;
+    mRangeLength -= size;
+    if (mRangeLength <= 0) {
+        mRangeLength = 0;
+        mRangeOffset = 0;
+    }
+}
+
 void Buffer::setRange(const size_t offset, const size_t size) {
     assert(offset <= mCapacity);
     assert(offset + size <= mCapacity);
@@ -59,6 +69,13 @@ void Buffer::setRange(const size_t offset, const size_t size) {
     mRangeOffset = (size == 0) ? 0 : offset;
     mRangeLength = size;
 }
+
+void Buffer::setSize(const size_t size) {
+    assert(size <= mCapacity);
+    mRangeOffset = 0;
+    mRangeLength = size;
+}
+
 
 void Buffer::setFarewellMessage(const shared_ptr<Message>& msg) {
     mFarewell = msg;
@@ -69,6 +86,20 @@ shared_ptr<Message> Buffer::meta() {
         mMeta = make_shared<Message>();
     }
     return mMeta;
+}
+
+bool
+Buffer::operator==(const Buffer &other) const {
+    bool same = false;
+    if (mData == other.mData && mCapacity == other.mCapacity && mRangeOffset == other.mRangeOffset && mRangeLength == other.mRangeLength) {
+        same = true;
+    }
+    return same;
+}
+
+bool
+Buffer::operator!=(const Buffer &other) const {
+    return !(*this == other);
 }
 
 } // namespace baseutils

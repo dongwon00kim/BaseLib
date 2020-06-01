@@ -92,7 +92,6 @@ void Looper::unregisterHandler(handler_id handlerID) {
 }
 
 Result Looper::start(bool runOnCallingThread) {
-
     if (runOnCallingThread) {
         {
             unique_lock<mutex> autoLock(mLock);

@@ -9,19 +9,14 @@ INCLUDE_DIRECTORIES (
     ${PROJECT_SOURCE_DIR}/include
 )
 
-SET ( SRC_FILES
-    BaseThread.cpp
-    Buffer.cpp
-    Handler.cpp
-    Looper.cpp
-    LooperRoster.cpp
-    Message.cpp
-)
+file(GLOB SRC_FILES *.cpp)
+file(GLOB INC_FILES include/*.h)
 
 LINK_LIBRARIES(
 )
 
-ADD_LIBRARY ( ${PROJECT_NAME} SHARED ${SRC_FILES} )
+#ADD_LIBRARY ( ${PROJECT_NAME} SHARED ${SRC_FILES} )
+ADD_LIBRARY ( ${PROJECT_NAME} STATIC ${SRC_FILES} )
 
 INSTALL (
 )
